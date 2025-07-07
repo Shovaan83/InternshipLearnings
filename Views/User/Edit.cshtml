@@ -1,0 +1,252 @@
+﻿@model YourApp.Models.EditUserModel
+@{
+    ViewData["Title"] = "Edit User";
+}
+
+<style>
+    .form-container {
+        background-color: #ffffff;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .form-header {
+        color: white;
+        padding: 15px 20px;
+        margin: -20px -20px 20px -20px;
+        border-radius: 8px 8px 0 0;
+        font-size: 18px;
+        font-weight: bold;
+    }
+
+    .form-row {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 15px;
+        align-items: start;
+    }
+
+    .form-group {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #333;
+            white-space: nowrap;
+        }
+
+    .form-control, .form-select {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+        .form-control:focus, .form-select:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+        }
+
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+        }
+
+    .button-group {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+        justify-content: flex-start;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        font-size: 14px;
+        cursor: pointer;
+        font-weight: 500;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        color: white;
+    }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+    }
+
+        .btn-secondary:hover {
+            background-color: #545b62;
+        }
+
+    .text-danger {
+        color: #dc3545;
+        font-size: 12px;
+        margin-top: 2px;
+    }
+
+    .required::after {
+        content: " *";
+        color: #dc3545;
+    }
+
+    .remarks-group {
+        margin-top: 15px;
+    }
+
+        .remarks-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+</style>
+
+<h2>Edit User</h2>
+
+<form asp-action="Edit" asp-controller="User" method="post">
+    @* Hidden Id field *@
+    <input type="hidden" asp-for="Id" />
+
+    <div class="form-container">
+        <div class="form-header">
+            <i class="fas fa-user-edit"></i> Edit User
+        </div>
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        <!-- First Row -->
+        <div class="form-row">
+            <div class="form-group">
+                <label asp-for="Branch" class="required"></label>
+                <select asp-for="Branch" class="form-select" asp-items="ViewBag.Branches">
+                    <option value="">Select Branch</option>
+                </select>
+                <span asp-validation-for="Branch" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Counter" class="required"></label>
+                <select asp-for="Counter" class="form-select" asp-items="ViewBag.Counters">
+                    <option value="">Select Counter</option>
+                </select>
+                <span asp-validation-for="Counter" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Role"></label>
+                <select asp-for="Role" class="form-select" asp-items="ViewBag.Roles">
+                    <option value="">Select Role</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Second Row -->
+        <div class="form-row">
+            <div class="form-group">
+                <label asp-for="Username" class="required">Username:</label>
+                <input asp-for="Username" class="form-control" />
+                <span asp-validation-for="Username" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="FullName" class="required">Full Name:</label>
+                <input asp-for="FullName" class="form-control" />
+                <span asp-validation-for="FullName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="NepaliName">नेपाली नाम:</label>
+                <input asp-for="NepaliName" class="form-control" />
+            </div>
+        </div>
+
+        <!-- Third Row -->
+        <div class="form-row">
+            <div class="form-group">
+                <label asp-for="Address">Address:</label>
+                <input asp-for="Address" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label asp-for="Gender">Gender:</label>
+                <select asp-for="Gender" class="form-select" asp-items="ViewBag.Genders">
+                    <option value="">Select Gender</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label asp-for="Contact" class="required">Contact:</label>
+                <input asp-for="Contact" class="form-control" />
+                <span asp-validation-for="Contact" class="text-danger"></span>
+            </div>
+        </div>
+
+        <!-- Fourth Row -->
+        <div class="form-row">
+            <div class="form-group">
+                <label asp-for="OtherContact">Other Contact:</label>
+                <input asp-for="OtherContact" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label asp-for="Email">Email:</label>
+                <input asp-for="Email" class="form-control" type="email" />
+            </div>
+            <div class="form-group">
+                <label asp-for="PasswordOption">Password Option:</label>
+                <select asp-for="PasswordOption" class="form-select" asp-items="ViewBag.PasswordOptions">
+                    <option value="">Select Option</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Fifth Row -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Active ?</label>
+                    <div class="checkbox-group">
+                        <input asp-for="Active" class="form-check-input" type="checkbox" />
+                        <label asp-for="Active" class="form-check-label">Yes</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Remarks Section -->
+        <div class="remarks-group">
+            <div class="form-group">
+                <label asp-for="Remarks">Remarks:</label>
+                <textarea asp-for="Remarks" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="Remarks" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button type="submit" class="btn btn-primary">Update User</button>
+            <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        $(document).ready(function () {
+            // Enabled client-side validation
+            $("form").validate();
+        });
+    </script>
+}
