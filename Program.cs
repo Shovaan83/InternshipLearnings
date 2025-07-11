@@ -1,6 +1,9 @@
 using JPT.Data;
 using JPT.Services;
+using JPT.Hubs;
 using YourApp.Services;
+
+Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton<DapperContext>();
@@ -11,6 +14,9 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton<DapperContext>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IServiceTicket, ServiceTicket>();
+
+builder.Services.AddSignalR();
 
 var app = builder.Build();
 
@@ -31,6 +37,9 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=User}/{action=Index}/{id?}");
+    pattern: "{controller=ServiceTicket}/{action=Index}/{id?}");
+
+app.MapHub<SupportTicketHub>("/supportTicketHub");
+app.MapHub<ChatHub>("/chatHub");
 
 app.Run();

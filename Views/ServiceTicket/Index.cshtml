@@ -1,0 +1,346 @@
+﻿@model JPT.Models.ViewModels.SupportTicketViewModel
+
+@{
+    ViewData["Title"] = "Support Center";
+}
+
+@section Styles {
+    <style>
+        :root {
+            --fintech-primary: #0a3d34; /* Deep, trustworthy green */
+            --fintech-secondary: #0c5b4f;
+            --fintech-accent: #10b981; /* Bright green for success */
+            --fintech-bg: #f7fafc; 
+            --fintech-text-primary: #1a202c;
+            --fintech-text-secondary: #4a5568;
+            --fintech-border: #e2e8f0;
+            --status-resolved-bg: #d1fae5;
+            --status-resolved-text: #065f46;
+            --status-inprogress-bg: #fef3c7;
+            --status-inprogress-text: #92400e;
+            --status-submitted-bg: #dbeafe;
+            --status-submitted-text: #1e40af;
+            --status-cancelled-bg: #fee2e2;
+            --status-cancelled-text: #991b1b;
+        }
+
+        .fintech-body {
+            background-color: var(--fintech-bg);
+            color: var(--fintech-text-primary);
+            padding: 2rem;
+        }
+
+        .fintech-card {
+            background-color: #ffffff;
+            border: 1px solid var(--fintech-border);
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            margin-bottom: 2rem;
+        }
+
+            .fintech-card .card-header, .fintech-card .card-body {
+                padding: 1.5rem;
+            }
+
+            .fintech-card .card-title {
+                font-size: 1.25rem;
+                font-weight: 600;
+                color: var(--fintech-text-primary);
+            }
+
+            .fintech-card .card-subtitle {
+                color: var(--fintech-text-secondary);
+                font-size: 0.9rem;
+            }
+
+        .form-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--fintech-text-secondary);
+        }
+
+        .form-control, .form-select {
+            border-radius: 0.5rem;
+            border-color: var(--fintech-border);
+        }
+
+            .form-control:focus, .form-select:focus {
+                border-color: var(--fintech-accent);
+                box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+            }
+
+        .btn-primary {
+            background-color: var(--fintech-primary);
+            border-color: var(--fintech-primary);
+            font-weight: 500;
+        }
+
+            .btn-primary:hover {
+                background-color: var(--fintech-secondary);
+                border-color: var(--fintech-secondary);
+            }
+
+        .table {
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+            .table th {
+                color: var(--fintech-text-secondary);
+                font-weight: 500;
+                text-transform: uppercase;
+                font-size: 0.75rem;
+                letter-spacing: 0.05em;
+                border-bottom: 2px solid var(--fintech-border);
+            }
+
+            .table td {
+                vertical-align: middle;
+            }
+
+        .status-badge {
+            font-weight: 500;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            text-align: center;
+            display: inline-block;
+        }
+
+        .status-resolved {
+            background-color: var(--status-resolved-bg);
+            color: var(--status-resolved-text);
+        }
+
+        .status-in-progress {
+            background-color: var(--status-inprogress-bg);
+            color: var(--status-inprogress-text);
+        }
+
+        .status-submitted {
+            background-color: var(--status-submitted-bg);
+            color: var(--status-submitted-text);
+        }
+
+        .status-cancelled {
+            background-color: var(--status-cancelled-bg);
+            color: var(--status-cancelled-text);
+        }
+
+        .faq .accordion-button {
+            font-weight: 600;
+            color: var(--fintech-text-primary);
+        }
+
+            .faq .accordion-button:not(.collapsed) {
+                background-color: transparent;
+                color: var(--fintech-primary);
+                box-shadow: none;
+            }
+    </style>
+}
+
+<div class="fintech-body">
+    <!-- Header -->
+    <header class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 fw-bold">Support Center</h1>
+            <p class="text-muted">Welcome. Please create a new ticket or review recent history.</p>
+        </div>
+    </header>
+
+    <!-- Success Message Alert -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success d-flex align-items-center" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <div>
+                <strong>Success!</strong> @TempData["SuccessMessage"]
+            </div>
+        </div>
+    }
+
+    <div class="row">
+        <!-- Left Column -->
+        <div class="col-lg-8">
+            <!-- Create New Ticket Form -->
+            <div class="fintech-card">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Create a New Support Ticket</h5>
+                    <form asp-controller="ServiceTicket" asp-action="CreateTicket" method="post">
+                        @Html.AntiForgeryToken()
+                        <fieldset>
+                            <legend class="h6 text-secondary mb-3">Issue Details</legend>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label asp-for="CreateTicket.RequestType" class="form-label"></label>
+                                    <select asp-for="CreateTicket.RequestType" class="form-select">
+                                        <option>Transaction Dispute</option>
+                                        <option>Account Inquiry</option>
+                                        <option>Payment Reversal</option>
+                                        <option>Flag for Review</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label asp-for="CreateTicket.TransactionId" class="form-label"></label>
+                                    <input asp-for="CreateTicket.TransactionId" class="form-control" placeholder="e.g., TXN-123456" />
+                                </div>
+                            </div>
+                        </fieldset>
+                        <hr class="my-4">
+                        <fieldset>
+                            <legend class="h6 text-secondary mb-3">Client Information</legend>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label asp-for="CreateTicket.ClientName" class="form-label"></label>
+                                    <input asp-for="CreateTicket.ClientName" class="form-control" />
+                                    <span asp-validation-for="CreateTicket.ClientName" class="text-danger small"></span>
+                                </div>
+                                <div class="col-md-6">
+                                    <label asp-for="CreateTicket.AccountNumber" class="form-label"></label>
+                                    <input asp-for="CreateTicket.AccountNumber" class="form-control" />
+                                    <span asp-validation-for="CreateTicket.AccountNumber" class="text-danger small"></span>
+                                </div>
+                                <div class="col-12">
+                                    <label asp-for="CreateTicket.Remarks" class="form-label"></label>
+                                    <textarea asp-for="CreateTicket.Remarks" class="form-control" rows="3" placeholder="Please provide all relevant details..."></textarea>
+                                    <span asp-validation-for="CreateTicket.Remarks" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </fieldset>
+                        <button type="submit" class="btn btn-primary mt-4 px-5 py-2"><i class="bi bi-send me-2"></i>Submit Ticket</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Recent Ticket History Card -->
+            <div class="fintech-card">
+                <div class="card-body">
+                    <h5 class="card-title">Recent Ticket History</h5>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Ticket ID</th>
+                                    <th>Client</th>
+                                    <th>Subject</th>
+                                    <th>Date Submitted</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ticketHistoryBody">
+                                @foreach (var item in Model.History)
+                                {
+                                    <tr>
+                                        <td>
+                                            <a asp-controller="ServiceTicket" asp-action="TicketDetail" asp-route-id="@item.RequestNumber" class="fw-bold text-decoration-none">
+                                                @item.RequestNumber
+                                            </a>
+                                        </td>
+                                        <td>@item.ClientName</td>
+                                        <td>@item.Subject</td>
+                                        <td>@item.Date.ToString("MMM dd, yyyy h:mm tt")</td>
+                                        <td>
+                                            @{
+                                                var statusClass = "status-" + item.Status.ToLower().Replace(" ", "-");
+                                            }
+                                            <span class="status-badge @statusClass">@item.Status</span>
+                                        </td>
+                                        <td>
+                                            <a asp-controller="ServiceTicket" asp-action="TicketDetail" asp-route-id="@item.RequestNumber" class="btn btn-sm btn-outline-secondary">
+                                                <i class="bi bi-chat-dots"></i> Chat
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column (FAQ) -->
+        <div class="col-lg-4">
+            <div class="fintech-card faq">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Frequently Asked Questions</h5>
+                    <div class="accordion accordion-flush" id="faqAccordion">
+                        @foreach (var faq in Model.Faqs)
+                        {
+                            <div class="accordion-item mb-2">
+                                <h2 class="accordion-header" id="heading-@faq.GetHashCode()">
+                                    <button class="accordion-button collapsed p-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-@faq.GetHashCode()">
+                                        @faq.Question
+                                    </button>
+                                </h2>
+                                <div id="collapse-@faq.GetHashCode()" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                    <div class="accordion-body text-muted ps-0">@faq.Answer</div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/lib/signalr/signalr.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl("/supportTicketHub")
+                .build();
+
+            connection.on("ReceiveNewTicket", function (ticket) {
+                const tableBody = document.getElementById("ticketHistoryBody");
+                if (!tableBody) return;
+
+                const tr = document.createElement("tr");
+                tr.style.backgroundColor = "#fffbeb";
+
+                const formattedDate = new Date(ticket.date).toLocaleString('en-US', {
+                    month: 'short', day: '2-digit', year: 'numeric',
+                    hour: 'numeric', minute: '2-digit', hour12: true
+                });
+
+                const statusClass = "status-" + ticket.status.toLowerCase().replace(" ", "-");
+
+                tr.innerHTML = `
+                    <td>
+                        <a href="/ServiceTicket/TicketDetail/${ticket.requestNumber}" class="fw-bold text-decoration-none">${ticket.requestNumber}</a>
+                    </td>
+                    <td>${ticket.clientName}</td>
+                    <td>${ticket.subject}</td>
+                    <td>${formattedDate}</td>
+                    <td><span class="status-badge ${statusClass}">${ticket.status}</span></td>
+                    <td>
+                        <a href="/ServiceTicket/TicketDetail/${ticket.requestNumber}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-chat-dots"></i> Chat</a>
+                    </td>`;
+
+                tableBody.prepend(tr);
+
+                setTimeout(() => {
+                    tr.style.transition = "background-color 1s ease";
+                    tr.style.backgroundColor = "transparent";
+                }, 2000);
+            });
+
+            async function start() {
+                try {
+                    await connection.start();
+                    console.log("SignalR Connected for table updates.");
+                } catch (err) {
+                    console.error("SignalR Connection Error: ", err);
+                    setTimeout(start, 5000);
+                }
+            };
+
+            connection.onclose(start);
+            start();
+        });
+    </script>
+}

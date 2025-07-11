@@ -1,0 +1,122 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - App</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+ 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <style>
+        body {
+            background-color: #f8f9fa; 
+        }
+
+        .sidebar {
+            background-color: #ffffff;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 280px;
+            padding: 1.5rem;
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+            z-index: 1000;
+        }
+
+            .sidebar .nav-link {
+                color: #6c757d; //
+                font-size: 1rem;
+                font-weight: 500;
+                padding: 0.75rem 1rem;
+                border-radius: 0.5rem;
+                margin-bottom: 0.5rem;
+                display: flex;
+                align-items: center;
+            }
+
+                .sidebar .nav-link .bi {
+                    margin-right: 1rem;
+                    font-size: 1.2rem;
+                }
+
+                .sidebar .nav-link:hover {
+                    background-color: #e9ecef;
+                    color: #212529;
+                }
+
+                .sidebar .nav-link.active {
+                    background-color: #0d6efd;
+                    color: #ffffff; 
+                }
+
+            .sidebar .logo {
+                background-color: #e9ecef;
+                height: 40px;
+                width: 150px;
+                border-radius: 0.5rem;
+                margin-bottom: 2rem;
+            }
+
+        .sidebar-dropdown-toggle::after {
+            margin-left: auto;
+            transition: transform .2s ease-in-out;
+        }
+
+        .main-container {
+            margin-left: 280px; 
+        }
+    </style>
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+    <div class="d-flex">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="logo"></div> 
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link" href="#"><i class="bi bi-grid-fill"></i> Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#"><i class="bi bi-search"></i> Booking Pad</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link d-flex justify-content-between" href="#"><i class="bi bi-airplane"></i> Manage Air <i class="bi bi-chevron-down sidebar-dropdown-toggle"></i></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link d-flex justify-content-between" href="#"><i class="bi bi-building"></i> Manage Hotel <i class="bi bi-chevron-down sidebar-dropdown-toggle"></i></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#"><i class="bi bi-compass"></i> Tour Package</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link d-flex justify-content-between" href="#"><i class="bi bi-credit-card"></i> Payment <i class="bi bi-chevron-down sidebar-dropdown-toggle"></i></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link d-flex justify-content-between" href="#"><i class="bi bi-receipt"></i> Statements <i class="bi bi-chevron-down sidebar-dropdown-toggle"></i></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" asp-controller="Support" asp-action="Index"><i class="bi bi-envelope-fill"></i> Support Ticket</a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content Area -->
+        <div class="main-container flex-grow-1">
+            <main role="main">
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

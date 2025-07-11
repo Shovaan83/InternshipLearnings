@@ -1,15 +1,13 @@
-﻿//
-// -> Make sure this is the TOP of your file. There should be no code before these 'using' statements.
-//
+﻿
 using Dapper;
-using JPT.Data;       // Your project's namespace for DapperContext
-using JPT.Services;   // Your project's namespace for IUserService
+using JPT.Data;      
+using JPT.Services;  
 using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
-using YourApp.Models; // The namespace for your AddUserModel and EditUserViewModel
+using YourApp.Models; 
 
-// Your namespace might be different. Ensure it matches your project structure.
+
 namespace YourApp.Services
 {
     public class UserService : IUserService
@@ -77,7 +75,6 @@ namespace YourApp.Services
             userToUpdate.PasswordOption = model.PasswordOption;
             userToUpdate.Active = model.Active;
             userToUpdate.Remarks = model.Remarks;
-            // The user's Password is NOT touched
 
             var sqlUpdate = @"UPDATE ""Users"" SET
                 ""Branch"" = @Branch, ""Counter"" = @Counter, ""Role"" = @Role,
@@ -97,9 +94,6 @@ namespace YourApp.Services
             await connection.ExecuteAsync(sql, new { Id = id });
         }
 
-    } // <- This is the closing brace for the 'UserService' class
+    } 
 
-} // <- This is the final closing brace for the 'YourApp.Services' namespace
-  //
-  // -> Make sure there is NOTHING after this final brace.
-  //
+} 

@@ -1,0 +1,215 @@
+﻿@model JPT.Models.ViewModels.TicketDetailViewModel
+
+@{
+    ViewData["Title"] = $"Chat for Ticket - {Model.TicketId}";
+}
+
+@section Styles {
+    <style>
+        .chat-container {
+            max-width: 800px;
+            margin: auto;
+            border: 1px solid var(--fintech-border, #e2e8f0);
+            border-radius: 0.75rem;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 75vh;
+            background-color: #fff;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        }
+
+        .chat-header {
+            background-color: var(--fintech-primary, #0a3d34);
+            color: white;
+            padding: 1rem;
+            font-weight: 600;
+        }
+
+        .chat-messages {
+            flex-grow: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            background-color: var(--fintech-bg, #f7fafc);
+        }
+
+        .chat-message {
+            margin-bottom: 1rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+            .chat-message .message-bubble {
+                padding: 0.75rem 1rem;
+                border-radius: 18px;
+                max-width: 75%;
+                word-wrap: break-word;
+            }
+
+            .chat-message.sent {
+                align-items: flex-end;
+            }
+
+            .chat-message.received {
+                align-items: flex-start;
+            }
+
+            .chat-message.sent .message-bubble {
+                background-color: var(--status-submitted-bg, #dbeafe);
+                color: var(--status-submitted-text, #1e40af);
+            }
+
+            .chat-message.received .message-bubble {
+                background-color: #e9ecef;
+            }
+
+        .message-meta {
+            font-size: 0.75rem;
+            color: #6c757d;
+            padding: 0.25rem 0.5rem 0;
+        }
+
+        .chat-input-form {
+            display: flex;
+            padding: 1rem;
+            border-top: 1px solid var(--fintech-border, #e2e8f0);
+            gap: 0.5rem;
+        }
+
+        #sendButton.btn-lg {
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+    </style>
+}
+
+<div class="fintech-body">
+    <div class="chat-container">
+        <div class="chat-header">
+            <i class="bi bi-chat-dots-fill me-2"></i>Live Chat for Ticket: @Model.TicketId
+        </div>
+        <div class="chat-messages" id="messagesList">
+            <div class="text-center text-muted p-3" id="connectionStatus">Connecting to chat server...</div>
+        </div>
+        <div class="chat-input-form">
+            <input type="text" id="userInput" class="form-control" style="max-width: 150px;" placeholder="Your Name..." value="Client" />
+            <input type="text" id="messageInput" class="form-control" placeholder="Type a message and press Enter..." disabled />
+            <button class="btn btn-primary btn-lg d-flex align-items-center" id="sendButton" title="Send Message" disabled>
+                <i class="bi bi-send-fill me-2"></i>
+                <span>Send</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/lib/signalr/signalr.min.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const ticketId = "@Model.TicketId";
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl("/chatHub")
+                .withAutomaticReconnect()
+                .build();
+
+            const sendButton = document.getElementById("sendButton");
+            const messageInput = document.getElementById("messageInput");
+            const userInput = document.getElementById("userInput");
+            const messagesList = document.getElementById("messagesList");
+            const connectionStatus = document.getElementById("connectionStatus");
+
+            function addMessageToChat(user, message, timestamp, isSentByMe) {
+                const messageDiv = document.createElement("div");
+                messageDiv.classList.add("chat-message");
+                messageDiv.classList.add(isSentByMe ? "sent" : "received");
+
+                const time = new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const sanitizedMessage = message.replace(/&/g, "&").replace(/</g, "<").replace(/>/g, ">");
+
+                const metaDiv = document.createElement("div");
+                metaDiv.classList.add("message-meta");
+                metaDiv.innerHTML = `<strong>${user}</strong> at ${time}`;
+
+                const bubbleDiv = document.createElement("div");
+                bubbleDiv.classList.add("message-bubble");
+                bubbleDiv.innerHTML = sanitizedMessage;
+
+                if (isSentByMe) {
+                    messageDiv.appendChild(bubbleDiv);
+                    messageDiv.appendChild(metaDiv);
+                } else {
+                    messageDiv.appendChild(metaDiv);
+                    messageDiv.appendChild(bubbleDiv);
+                }
+
+                messagesList.appendChild(messageDiv);
+                messagesList.scrollTop = messagesList.scrollHeight;
+            }
+
+            connection.on("ReceiveMessage", (user, message, timestamp) => {
+                const myName = userInput.value;
+                if (user !== myName) {
+                    console.log(`Received message from ${user}: ${message}`);
+                    addMessageToChat(user, message, timestamp, false);
+                }
+            });
+
+            function sendMessage() {
+                const user = userInput.value;
+                const message = messageInput.value;
+
+                if (message && message.trim()) {
+                    console.log(`Sending message: "${message}" as user: "${user}"`);
+
+                    connection.invoke("SendMessage", ticketId, user, message).catch(err => console.error("Error sending message:", err.toString()));
+
+                    addMessageToChat(user, message, new Date(), true);
+
+                    messageInput.value = ""; 
+                    messageInput.focus();
+                }
+            }
+
+            sendButton.addEventListener("click", sendMessage);
+            messageInput.addEventListener("keypress", event => {
+                if (event.key === "Enter") {
+                    event.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            async function start() {
+                try {
+                    await connection.start();
+                    console.log("SignalR Connected. Ready to chat.");
+                    connectionStatus.textContent = "Connected.";
+                    connectionStatus.style.color = "green";
+                    sendButton.disabled = false;
+                    messageInput.disabled = false;
+                    await connection.invoke("JoinTicketRoom", ticketId);
+                    setTimeout(() => { connectionStatus.style.display = 'none'; }, 2000);
+                } catch (err) {
+                    console.error("SignalR Connection Failed: ", err);
+                    connectionStatus.textContent = "Connection failed. Retrying...";
+                    connectionStatus.style.color = "red";
+                    setTimeout(start, 5000);
+                }
+            }
+
+            connection.onreconnecting(error => {
+                console.warn(`Connection lost due to error "${error}". Reconnecting.`);
+                sendButton.disabled = true;
+                messageInput.disabled = true;
+            });
+
+            connection.onreconnected(connectionId => {
+                console.log(`Connection reestablished. Connected with connectionId "${connectionId}".`);
+                sendButton.disabled = false;
+                messageInput.disabled = false;
+            });
+
+            start();
+        });
+    </script>
+}
