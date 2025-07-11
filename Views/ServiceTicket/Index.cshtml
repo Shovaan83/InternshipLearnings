@@ -5,6 +5,9 @@
 }
 
 @section Styles {
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" />
+
     <style>
         :root {
             --fintech-primary: #0a3d34; /* Deep, trustworthy green */
@@ -218,7 +221,7 @@
                 <div class="card-body">
                     <h5 class="card-title">Recent Ticket History</h5>
                     <div class="table-responsive">
-                        <table class="table">
+                        <table id="ticketsTable" class="table table-striped" style="width:100%">
                             <thead>
                                 <tr>
                                     <th>Ticket ID</th>
@@ -288,19 +291,25 @@
 </div>
 
 @section Scripts {
+
+    <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
     <script src="~/lib/signalr/signalr.min.js"></script>
+
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
+        $(document).ready(function () {
+            var dataTable = $('#ticketsTable').DataTable({
+                "order": [[3, "desc"]] 
+            });
+
             const connection = new signalR.HubConnectionBuilder()
                 .withUrl("/supportTicketHub")
                 .build();
 
             connection.on("ReceiveNewTicket", function (ticket) {
-                const tableBody = document.getElementById("ticketHistoryBody");
-                if (!tableBody) return;
-
-                const tr = document.createElement("tr");
-                tr.style.backgroundColor = "#fffbeb";
+                console.log("New ticket received for DataTable:", ticket);
 
                 const formattedDate = new Date(ticket.date).toLocaleString('en-US', {
                     month: 'short', day: '2-digit', year: 'numeric',
@@ -309,24 +318,23 @@
 
                 const statusClass = "status-" + ticket.status.toLowerCase().replace(" ", "-");
 
-                tr.innerHTML = `
-                    <td>
-                        <a href="/ServiceTicket/TicketDetail/${ticket.requestNumber}" class="fw-bold text-decoration-none">${ticket.requestNumber}</a>
-                    </td>
-                    <td>${ticket.clientName}</td>
-                    <td>${ticket.subject}</td>
-                    <td>${formattedDate}</td>
-                    <td><span class="status-badge ${statusClass}">${ticket.status}</span></td>
-                    <td>
-                        <a href="/ServiceTicket/TicketDetail/${ticket.requestNumber}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-chat-dots"></i> Chat</a>
-                    </td>`;
+                const ticketIdHtml = `<a href="/ServiceTicket/TicketDetail/${ticket.requestNumber}" class="fw-bold text-decoration-none">${ticket.requestNumber}</a>`;
+                const statusHtml = `<span class="status-badge ${statusClass}">${ticket.status}</span>`;
+                const actionsHtml = `<a href="/ServiceTicket/TicketDetail/${ticket.requestNumber}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-chat-dots"></i> Chat</a>`;
 
-                tableBody.prepend(tr);
+                var newRowNode = dataTable.row.add([
+                    ticketIdHtml,
+                    ticket.clientName,
+                    ticket.subject,
+                    formattedDate,
+                    statusHtml,
+                    actionsHtml
+                ]).draw(false).node();
 
-                setTimeout(() => {
-                    tr.style.transition = "background-color 1s ease";
-                    tr.style.backgroundColor = "transparent";
-                }, 2000);
+                $(newRowNode).css('background-color', '#fffbeb');
+                setTimeout(function () {
+                    $(newRowNode).css('background-color', '');
+                }, 3000);
             });
 
             async function start() {
